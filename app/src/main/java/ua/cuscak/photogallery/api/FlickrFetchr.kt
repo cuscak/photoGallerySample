@@ -18,7 +18,7 @@ class FlickrFetchr {
     private val flickrApi: FlickrApi
 
     init {
-        val gson = GsonBuilder().registerTypeAdapter(PhotoDeserializer::class.java, PhotoDeserializer()).create()
+        val gson = GsonBuilder().registerTypeAdapter(PhotoResponse::class.java, PhotoDeserializer()).create()
 
         val retrofit: Retrofit = Retrofit.Builder()
             .baseUrl("https://api.flickr.com/")
@@ -40,7 +40,6 @@ class FlickrFetchr {
 
             override fun onResponse(call: Call<PhotoResponse>, response: Response<PhotoResponse>) {
                 Log.d(TAG, "Response received")
-                Log.d(TAG, "${response.body().toString()}")
                 //val flickrResponse: FlickrResponse? = response.body()
                 //val photoResponse: PhotoResponse? = flickrResponse?.photos
 
