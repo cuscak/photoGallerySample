@@ -1,15 +1,33 @@
 package ua.cuscak.photogallery
 
-import androidx.lifecycle.LiveData
-import androidx.lifecycle.ViewModel
+import android.app.Application
+import androidx.lifecycle.*
 import ua.cuscak.photogallery.api.FlickrFetchr
 
-class PhotoGalleryViewModel : ViewModel() {
+class PhotoGalleryViewModel(private val app: Application) : AndroidViewModel(app) {
+
+    private val flickrFetchr = FlickrFetchr()
+    private val mutableSearchTerm = MutableLiveData<String>()
 
     val galleryItemLiveData: LiveData<List<GalleryItem>>
 
+    val searchTerm: String
+        get() = mutableSearchTerm.value ?: ""
+
     init {
-        galleryItemLiveData = FlickrFetchr().fetchPhotos()
+        mutableSearchTerm.value = QueryPreferences.getStoredQuery(app)
+        galleryItemLiveData = Transformations.switchMap(mutableSearchTerm) { searchTerm ->
+            if (searchTerm.isBlank()) {
+                flickrFetchr.fetchPhotos()
+            } else {
+                flickrFetchr.searchPhotos(searchTerm)
+            }
+        }
+    }
+
+    fun fetchPhotos(query: String = "") {
+        QueryPreferences.setStoredQuery(app, query)
+        mutableSearchTerm.value = query
     }
 }
 
